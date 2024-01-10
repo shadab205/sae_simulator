@@ -1,128 +1,224 @@
+close all
 %% Perpendicular Parking Simulation of Robot
-% Initial coordinates of the rectangle
-y_US_pos = 20;
-x_US_pos = 7.5;
+sample_time=0.1
 
-x_BackAxle_mid = 4;
-y_BackAxle_mid = 7.5;
+dx_robo=300
+dy_robo=150
 
-
-x1 = 274.391; % x-coordinate of top-left corner
-y1 = 200; % y-coordinate of top-left corner
-x2 = x1 + 29; % x-coordinate of bottom-right corner
-y2 = y1 + 15; % y-coordinate of bottom-right corner
-
-
-% Destination coordinates
-new_y1 = 230.875; % new x-coordinate of top-left corner
-new_x1 = 251.1; % new y-coordinate of top-left corner
-new_y2 = new_x1 + 29; % new x-coordinate of bottom-right corner
-new_x2 = new_y1 + 15; % new y-coordinate of bottom-right corner
-
-
-
+speed=166
+wheel_base=155
+turn_radius=260
+steer_angle=(atan(wheel_base/turn_radius))
+rad2deg(steer_angle)
 % Create a figure and plot the initial rectangle
-figure;
-r_left = rectangle('Position',[0 260 178 43.5], 'FaceColor', 'r','EdgeColor','b','LineWidth',3);
-line_centre = line([178 200.2],[303.5 303.5],'color','b','LineWidth',3);
-r_right = rectangle('Position',[200.2 260 178 43.5], 'FaceColor', 'r','EdgeColor','b','LineWidth',3);
-axis([0 320 0 320])
-hold on
+f1=figure;
+f1.Position=[50,100,1200,250]
 
-Point_0 = [227, 220];
-Point_1 = [189.1  303.5-11.25];
-%Point_1 = [(r_left.Position(3) + ((r_right.Position(1)-(r_left.Position(1)+r_left.Position(3)))/4)), 240+((r_left.Position(2) + r_left.Position(4) - r_left.Position(2))/2)]
+hold on;
 
+r_left_x1=0;
+r_left_x2=0;
+r_left_x3=5*dx_robo;
+r_left_x4=5*dx_robo;
 
-distance = [sqrt((Point_0(1) - Point_1(1))^2 + (Point_0(2) - Point_1(2))^2)];
-radius_arc = distance/2;
-beta1_start = 270;
-beta1_end = 200;
-beta1_angle = beta1_start - beta1_end;
-num_points = 100;
-center_arc1 = [Point_0(1), Point_0(2) + sin(beta1_angle)];
-beta1 = linspace(deg2rad(beta1_start), deg2rad(beta1_end), num_points);
+r_left_y1=2*dy_robo;
+r_left_y2=2*dy_robo+1.5*dx_robo;
+r_left_y3=2*dy_robo;
+r_left_y4=2*dy_robo+1.5*dx_robo;
 
-% Draw horizontal line
-x_start = 0;
-y_start = 179.98;
-x_end = 227;
-y_end = 179.98;
+pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
+plot(pgon_r_left);
 
-% Draw vertical line
-xv_start = 189.141;
-yv_start = 205.49;
-xv_end = Point_1(1);
-yv_end = Point_1(2);
+center_line_x1=5*dx_robo;
+center_line_x2=5*dx_robo;
+center_line_x3=5*dx_robo+1.5*dy_robo;
+center_line_x4=5*dx_robo+1.5*dy_robo;
 
-num_steps = 100;
+center_line_y1=2*dy_robo+1.6*dx_robo;
+center_line_y2=2*dy_robo+1.5*dx_robo;
+center_line_y3=2*dy_robo+1.6*dx_robo;
+center_line_y4=2*dy_robo+1.5*dx_robo;
+pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
+plot(pgon_c_line);
 
-straight_line = line([x_start x_end], [y_start y_end], 'color', 'g', 'LineWidth', 2);
-vertical_line = line([xv_start xv_end], [yv_start yv_end], 'color', 'r', 'LineWidth', 2);
+r_right_x1=5*dx_robo+1.5*dy_robo;
+r_right_x2=5*dx_robo+1.5*dy_robo;
+r_right_x3=5*dx_robo+1.5*dy_robo+3*dx_robo;
+r_right_x4=5*dx_robo+1.5*dy_robo+3*dx_robo;
 
+r_right_y1=2*dy_robo;
+r_right_y2=2*dy_robo+1.5*dx_robo;
+r_right_y3=2*dy_robo;
+r_right_y4=2*dy_robo+1.5*dx_robo;
 
-% Coordinates of Arc1
-arc1_x = center_arc1(1) + radius_arc * cos(beta1);
-arc1_y = center_arc1(2) + radius_arc * sin(beta1);
+pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+plot(pgon_r_right);
 
-hold on
-arc_curve = plot(arc1_x, arc1_y, 'b','LineWidth',2);
+%robo_coordinates rear center
 
+x_car=0;
+y_car=dy_robo/2;
+
+x1 = x_car; % x-coordinate of top-left corner
+y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
+x2 = x_car; % x-coordinate of bottom-right corner
+y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
+y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
+x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
+y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
 % Initialize rectangle plot
-rect = rectangle('Position', [x1, y1, x2 - x1, y2 - y1], 'EdgeColor', 'm', 'LineWidth', 2);
+pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
+plot(pgon_car);
 title('EV3 Robot Simulator - Perpendicular Parking');
 
+% Draw straight line
+x_start = 0;
+y_start = 0;
+x_end = 6.55*dx_robo;
+y_end = dy_robo/2;
+num_steps = 100;
 
-% Move the rectangle along the horizontal line
-for i = 1:num_steps
+straight_line = line([x_start x_end], [y_start+dy_robo/2 y_start+dy_robo/2], 'color', 'g', 'LineWidth', 1.5);
+
+vehicle_speed=166 
+% Move the rectangle along the straight line
+for i = 1:113
     % Calculate the x-coordinate for each step
-    x_step = x_end * (i / num_steps);
 
-    % Update rectangle coordinates
-    x1_line = x_step;
-    y1_line = y_start;
-    x2_line = x_step + 29;
-    y2_line = y_start + 15;
+    %clf(f1);
+    axis([-2*dx_robo 11*dx_robo -3*dy_robo 6*dy_robo]);
+    
+    
+    x_car=x_car+(vehicle_speed*cos(0)*sample_time);
+    y_car=y_car+(vehicle_speed*sin(0)*sample_time);
+    
+    x1 = x_car; % x-coordinate of top-left corner
+    y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
+    x2 = x_car; % x-coordinate of bottom-right corner
+    y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+    x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
+    y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
+    x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
+    y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+    % Initialize rectangle plot
+    pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
+    pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
+    pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
+    pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+    
+    plot(pgon_car);
+    hold on;
+    %poly1 = rotate(pgon_car,45*i/num_steps,[x_car y_car]);
+    %poly1.Vertices
+    %plot(poly1);
+    hold on;
+    plot(pgon_r_left);
+    hold on;
+    plot(pgon_c_line);
+    hold on;
+    plot(pgon_r_right);
+    hold on;
+    plot(x_car, y_car, '.')
+    hold on; 
+    plot(x_car, y_car, '.')
 
     % Update rectangle position
-    set(rect, 'Position', [x1_line - x_BackAxle_mid, y1_line - y_BackAxle_mid, x2_line - x1_line, y2_line - y1_line]);
-    drawnow;
-    pause(0.05);
+    %set(rect, 'Position', [x1_line, y1_line, x2_line, y2_line]);
+    %poly1 = rotate(rect,45);
+    %drawnow;
+    %pause(sample_time/1000);
+    pause(sample_time/10);
 end
+% Move the rectangle along the straight line
 
-% Move the rectangle along arc_curve
-for j = 1:num_points
-    dx1 = arc1_x(j) - x1; % Change in x
-    dy1 = arc1_y(j) - y1; % Change in y
-    
-    % Update rectangle coordinates
-    x1 = x1 + dx1;
-    y1 = y1 + dy1;
-    x2 = x2 + dx1;
-    y2 = y2 + dy1;
-
-    % Update the rectangle's position
-    set(rect, 'Position', [x1 - x_BackAxle_mid, y1 - y_BackAxle_mid, x2 - x1, y2 - y1]);
-    drawnow; % Refresh the figure
-    pause(0.05); % Pause for smoother animation
-end
-
-% Move the rectangle along arc_curve
-for i = 1:num_steps
+%arc1
+x=x_car;
+y=y_car;
+theta=0;
+speed=76;
+for i = 1:53
     % Calculate the x-coordinate for each step
-    yv_step = yv_start + (yv_end - yv_start) * (i / num_steps);
-
-    % Update rectangle coordinates
-    x1_vline = xv_start;
-    y1_vline = yv_step;
-    x2_vline = xv_start + 29;
-    y2_vline = yv_step + 15;
-
-    yv_BackAxle_mid = 24;
-    xv_BackAxle_mid = 7.5;
+    i
+    %clf(f1);
+    axis([-2*dx_robo 11*dx_robo -2*dy_robo 6*dy_robo]);
+    del_theta = -speed/wheel_base*tan(steer_angle);
+    theta=theta+(del_theta*0.1);
+    rad2deg(theta)
+    x_car=x_car+(-speed)*cos(theta)*0.1;
+    y_car=y_car+(-speed)*sin(theta)*0.1;
     
-    % Update rectangle position
-    set(rect, 'Position', [x1_vline - xv_BackAxle_mid/2, y1_vline - yv_BackAxle_mid - xv_BackAxle_mid, y2_vline - y1_vline - xv_BackAxle_mid, x2_vline - x1_vline + yv_BackAxle_mid/2]);
-    drawnow;
-    pause(0.05);
+    x1 = x_car; % x-coordinate of top-left corner
+    y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
+    x2 = x_car; % x-coordinate of bottom-right corner
+    y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+    x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
+    y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
+    x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
+    y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+    % Initialize rectangle plot
+    pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
+    pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
+    pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
+    pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+    
+    %plot(pgon_car);
+    %hold on;
+    actual_car = rotate(pgon_car,rad2deg(theta),[x_car y_car]);
+    %actual_car.Vertices
+    plot(actual_car);
+    hold on;
+    plot(pgon_r_left);
+    hold on;
+    plot(pgon_c_line);
+    hold on;
+    plot(pgon_r_right);
+    hold on;
+    plot(x_car, y_car, '.', 'LineWidth', 1);
+    
+    pause(sample_time);
 end
+
+
+for i = 1:45
+    % Calculate the x-coordinate for each step
+    i
+    %clf(f1);
+    axis([-02*dx_robo 11*dx_robo -02*dy_robo 6*dy_robo]);
+    del_theta = -speed/wheel_base*-tan(0);
+    
+    theta=theta+(del_theta*0.1);
+    rad2deg(theta)
+    x_car=x_car+(-speed)*cos(theta)*0.1;
+    y_car=y_car+(-speed)*sin(theta)*0.1;
+    
+    x1 = x_car; % x-coordinate of top-left corner
+    y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
+    x2 = x_car; % x-coordinate of bottom-right corner
+    y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+    x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
+    y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
+    x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
+    y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+    % Initialize rectangle plot
+    pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
+    pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
+    pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
+    pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+    
+    %plot(pgon_car);
+    %hold on;
+    actual_car = rotate(pgon_car,rad2deg(theta),[x_car y_car]);
+    %actual_car.Vertices
+    plot(actual_car);
+    hold on;
+    plot(pgon_r_left);
+    hold on;
+    plot(pgon_c_line);
+    hold on;
+    plot(pgon_r_right);
+    hold on;
+    plot(x_car, y_car, '.', 'LineWidth', 1);
+    pause(sample_time);
+end
+speed=166;

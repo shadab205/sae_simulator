@@ -88,36 +88,16 @@ parking_spot_detected = 0;
 
 vehicle_speed=166 
 
-%Check for Parking Spot
-%distance = new2_line_y - y_car;
-distance = intp_line_y(3) - intp_line_y(2) - y_car;
-if distance > 125 && detect_flag == 0
-   start_distance = intp_line_x(3);
-   detect_flag = 1;
-   parking_spot_detected = 0;
-end
-if detect_flag == 1
-   park_distance = intp_line_x(5) - start_distance;
-if park_distance > 300
-   parking_spot_detected = 1;
-else
-   parking_spot_detected = 0;
-end
-if distance < 125
-   detect_flag = 0;
-end
-end
-
-if parking_spot_detected == 1
+%parking_spot_detected == 1
     % Move the rectangle along the straight line
     for i = 1:118
         % Calculate the x-coordinate for each step
-    
+        
         %clf(f1);
         axis([-2*dx_robo 11*dx_robo -2*dy_robo 4*dy_robo]);
         x_step = x_end * (i / num_steps);
         
-        x_car=x_car+(vehicle_speed*cos(0)*sample_time);
+        x_car=x_car+(vehicle_speed*cos(0)*sample_time)
         y_car=y_car+(vehicle_speed*sin(0)*sample_time);
         
         x1 = x_car; % x-coordinate of top-left corner
@@ -132,13 +112,15 @@ if parking_spot_detected == 1
         pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
         pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
         pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
-        pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);  
-    
+        pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+        
         hold on
         % Plot Ultrasonic Sensor Echoes
         new2_line_y = interp1(intp_line_x,intp_line_y, x_car);
+        y_rand=-25 + (25+25)*rand(1);
+        new2_line_y = new2_line_y + y_rand;
         plot(x_car, new2_line_y, 'r*', 'LineWidth', 5)
-    
+        
         plot(pgon_car);
         hold on;
         %poly1 = rotate(pgon_car,45*i/num_steps,[x_car y_car]);
@@ -152,20 +134,89 @@ if parking_spot_detected == 1
         plot(pgon_r_right);
         hold on;
         plot(x_car, y_car, '.')
-        hold on; 
+        hold on;
         plot(x_car, y_car, '.')
-    
-    
-        pause(sample_time/10);
+        
+        
+       % pause(sample_time/10);
+        
+        %Check for Parking Spot
+        distance = new2_line_y - y_car - dy_robo/2; % distance = US echoes - top edge of car
+        
+        %distance = intp_line_y(3) - intp_line_y(2) - y_car;
+        if distance >= 350 && detect_flag == 0 %distance is the ehoe length for current car position(x_car,y_car)
+            start_distance = x_car
+            detect_flag = 1;
+            parking_spot_detected = 0;
+        end
+        if detect_flag == 1
+            park_distance = x_car - start_distance
+            if park_distance > 425
+                parking_spot_detected = 1;
+            else
+                parking_spot_detected = 0;
+            end
+            if distance < 350
+                detect_flag = 0;
+            end
+        end
+        
+        if parking_spot_detected == 1
+            break;
+        end
     end
-    % Move the rectangle along the straight line
-    
-    %arc1
+     %    arc1
     x=x_car;
     y=y_car;
     theta=0;
+    speed=166;
+    % move forward
+    % Move the rectangle along the straight line
+        for i = 1:7
+        % Calculate the x-coordinate for each step
+        i
+        %clf(f1);
+        axis([-2*dx_robo 11*dx_robo -2*dy_robo 4*dy_robo]);
+        del_theta = speed/wheel_base*tan(0);
+        theta=theta+(del_theta*0.1);
+        rad2deg(theta)
+        x_car=x_car+(speed)*cos(theta)*0.1;
+        y_car=y_car+(speed)*sin(theta)*0.1;
+        
+        x1 = x_car; % x-coordinate of top-left corner
+        y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
+        x2 = x_car; % x-coordinate of bottom-right corner
+        y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+        x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
+        y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
+        x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
+        y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+        % Initialize rectangle plot
+        pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
+        pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
+        pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
+        pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+        
+        %plot(pgon_car);
+        %hold on;
+        actual_car = rotate(pgon_car,rad2deg(theta),[x_car y_car]);
+        %actual_car.Vertices
+        plot(actual_car);
+        hold on;
+        plot(pgon_r_left);
+        hold on;
+        plot(pgon_c_line);
+        hold on;
+        plot(pgon_r_right);
+        hold on;
+        plot(x_car, y_car, '.', 'LineWidth', 1);
+        
+        pause(sample_time);
+    end
+    theta=0;
     speed=76;
-    for i = 1:50
+    
+    for i = 1:25
         % Calculate the x-coordinate for each step
         i
         %clf(f1);
@@ -207,8 +258,93 @@ if parking_spot_detected == 1
         pause(sample_time);
     end
     
+    %move backward
+    for i = 1:30
+        % Calculate the x-coordinate for each step
+        i
+        %clf(f1);
+        axis([-02*dx_robo 11*dx_robo -02*dy_robo 4*dy_robo]);
+        del_theta = -speed/wheel_base*-tan(0);
+        
+        theta=theta+(del_theta*0.1);
+        rad2deg(theta)
+        x_car=x_car+(-speed)*cos(theta)*0.1;
+        y_car=y_car+(-speed)*sin(theta)*0.1;
+        
+        x1 = x_car; % x-coordinate of top-left corner
+        y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
+        x2 = x_car; % x-coordinate of bottom-right corner
+        y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+        x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
+        y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
+        x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
+        y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+        % Initialize rectangle plot
+        pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
+        pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
+        pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
+        pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+        
+        %plot(pgon_car);
+        %hold on;
+        actual_car = rotate(pgon_car,rad2deg(theta),[x_car y_car]);
+        %actual_car.Vertices
+        plot(actual_car);
+        hold on;
+        plot(pgon_r_left);
+        hold on;
+        plot(pgon_c_line);
+        hold on;
+        plot(pgon_r_right);
+        hold on;
+        plot(x_car, y_car, '.', 'LineWidth', 1);
+        pause(sample_time);
+    end
+    speed=76;
+    for i = 1:5
+        % Calculate the x-coordinate for each step
+        i
+        %clf(f1);
+        axis([-02*dx_robo 11*dx_robo -02*dy_robo 4*dy_robo]);
+        del_theta = -speed/wheel_base*tan(steer_angle);
+        
+        theta=theta+(del_theta*0.1);
+        rad2deg(theta)
+        x_car=x_car+(-speed)*cos(theta)*0.1;
+        y_car=y_car+(-speed)*sin(theta)*0.1;
+        
+        x1 = x_car; % x-coordinate of top-left corner
+        y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
+        x2 = x_car; % x-coordinate of bottom-right corner
+        y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+        x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
+        y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
+        x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
+        y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
+        % Initialize rectangle plot
+        pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
+        pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
+        pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
+        pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
+        
+        %plot(pgon_car);
+        %hold on;
+        actual_car = rotate(pgon_car,rad2deg(theta),[x_car y_car]);
+        %actual_car.Vertices
+        plot(actual_car);
+        hold on;
+        plot(pgon_r_left);
+        hold on;
+        plot(pgon_c_line);
+        hold on;
+        plot(pgon_r_right);
+        hold on;
+        plot(x_car, y_car, '.', 'LineWidth', 1);
+        pause(sample_time*2);
+    end
     
-    for i = 1:15
+    
+    for i = 1:25
         % Calculate the x-coordinate for each step
         i
         %clf(f1);
@@ -249,7 +385,8 @@ if parking_spot_detected == 1
         plot(x_car, y_car, '.', 'LineWidth', 1);
         pause(sample_time);
     end
-    speed=166;
+    
+    speed=76;
     for i = 1:5
         % Calculate the x-coordinate for each step
         i
@@ -291,90 +428,3 @@ if parking_spot_detected == 1
         plot(x_car, y_car, '.', 'LineWidth', 1);
         pause(sample_time*2);
     end
-    
-    
-    for i = 1:9
-        % Calculate the x-coordinate for each step
-        i
-        %clf(f1);
-        axis([-02*dx_robo 11*dx_robo -02*dy_robo 4*dy_robo]);
-        del_theta = -speed/wheel_base*-tan(steer_angle);
-        
-        theta=theta+(del_theta*0.1);
-        rad2deg(theta)
-        x_car=x_car+(-speed)*cos(theta)*0.1;
-        y_car=y_car+(-speed)*sin(theta)*0.1;
-        
-        x1 = x_car; % x-coordinate of top-left corner
-        y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
-        x2 = x_car; % x-coordinate of bottom-right corner
-        y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
-        x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
-        y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
-        x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
-        y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
-        % Initialize rectangle plot
-        pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
-        pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
-        pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
-        pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
-        
-        %plot(pgon_car);
-        %hold on;
-        actual_car = rotate(pgon_car,rad2deg(theta),[x_car y_car]);
-        %actual_car.Vertices
-        plot(actual_car);
-        hold on;
-        plot(pgon_r_left);
-        hold on;
-        plot(pgon_c_line);
-        hold on;
-        plot(pgon_r_right);
-        hold on;
-        plot(x_car, y_car, '.', 'LineWidth', 1);
-        pause(sample_time);
-    end
-    
-    speed=166;
-    for i = 1:2
-        % Calculate the x-coordinate for each step
-        i
-        %clf(f1);
-        axis([-02*dx_robo 11*dx_robo -02*dy_robo 4*dy_robo]);
-        del_theta = speed/wheel_base*tan(steer_angle);
-        
-        theta=theta+(del_theta*0.1);
-        rad2deg(theta)
-        x_car=x_car+(speed)*cos(theta)*0.1;
-        y_car=y_car+(speed)*sin(theta)*0.1;
-        
-        x1 = x_car; % x-coordinate of top-left corner
-        y1 = y_car + dy_robo/2; % y-coordinate of top-left corner
-        x2 = x_car; % x-coordinate of bottom-right corner
-        y2 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
-        x3 = x_car+dx_robo; % x-coordinate of bottom-right corner
-        y3 = y_car + dy_robo/2; % y-coordinate of bottom-right corner
-        x4 = x_car+dx_robo; % x-coordinate of bottom-right corner
-        y4 = y_car - dy_robo/2; % y-coordinate of bottom-right corner
-        % Initialize rectangle plot
-        pgon_car = polyshape([x1 x2 x4 x3],[y1 y2 y4 y3]);
-        pgon_r_left = polyshape([r_left_x1 r_left_x2 r_left_x4 r_left_x3],[r_left_y1 r_left_y2 r_left_y4 r_left_y3]);
-        pgon_c_line = polyshape([center_line_x1 center_line_x2 center_line_x4 center_line_x3],[center_line_y1 center_line_y2 center_line_y4 center_line_y3]);
-        pgon_r_right = polyshape([r_right_x1 r_right_x2 r_right_x4 r_right_x3],[r_right_y1 r_right_y2 r_right_y4 r_right_y3]);
-        
-        %plot(pgon_car);
-        %hold on;
-        actual_car = rotate(pgon_car,rad2deg(theta),[x_car y_car]);
-        %actual_car.Vertices
-        plot(actual_car);
-        hold on;
-        plot(pgon_r_left);
-        hold on;
-        plot(pgon_c_line);
-        hold on;
-        plot(pgon_r_right);
-        hold on;
-        plot(x_car, y_car, '.', 'LineWidth', 1);
-        pause(sample_time*2);
-    end
-end 

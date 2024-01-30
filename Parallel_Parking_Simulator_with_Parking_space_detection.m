@@ -93,7 +93,7 @@ intp_line_y = [1.5*dy_robo 1.5*dy_robo 1.5*dy_robo+1.5*dy_robo 1.5*dy_robo+1.5*d
 
 
 % Sample list of items
-listOfItems = {'Scenario: Valid Parking Spot', 'Scenario: Invalid Obj1', 'Scenario: Valid Parking Space, Invalid Obj2', 'Scenario: Invalid Parking Space', 'Scenario: Invalid Obj2'};
+listOfItems = {'Scenario: Valid Parking Spot', 'Scenario: Invalid Obj1', 'Scenario: Valid Parking Space, Invalid Obj2', 'Scenario: Invalid Parking Space', 'Scenario: Invalid Obj2', 'Scenario: Single Faulty Echo'};
 
 % Create a list dialog box
 [selected, ok] = listdlg('ListString', listOfItems, 'PromptString', 'Select an Scenario:', 'SelectionMode', 'single','ListSize', [250, 100]);
@@ -121,9 +121,11 @@ elseif scenario ==4
 intp_line_x = [0 1499 1500 1949-200 1950-200 2850-200];
 intp_line_y = [1.5*dy_robo 1.5*dy_robo 1.5*dy_robo+1.5*dy_robo 1.5*dy_robo+1.5*dy_robo 1.5*dy_robo 1.5*dy_robo];
 elseif scenario ==5
-
 intp_line_x = [0 1499 1500 1949 1950 2020 2021 2850];
 intp_line_y = [1.5*dy_robo 1.5*dy_robo 1.5*dy_robo+1.5*dy_robo 1.5*dy_robo+1.5*dy_robo 1.5*dy_robo 1.5*dy_robo 3.5*dy_robo 3.5*dy_robo];    
+elseif scenario ==6
+intp_line_x = [0 1499 1500 1949 1950 2850];
+intp_line_y = [1.5*dy_robo 1.5*dy_robo 1.5*dy_robo+1.5*dy_robo 1.5*dy_robo+1.5*dy_robo 1.5*dy_robo 1.5*dy_robo];     
 else
     disp('wrong input, scenario one selected');
 end
@@ -164,7 +166,7 @@ showPlotFlag = 0;
 vehicle_speed=166
 for i = 1:160%118
     % Calculate the x-coordinate for each step
-    if i==90
+    if i==100
         disp('hi')
     end
     %clf(f1);
@@ -193,6 +195,11 @@ for i = 1:160%118
     new2_line_y = interp1(intp_line_x,intp_line_y, x_car);
     y_rand=-15 + (15+15)*rand(1);
     new2_line_y = new2_line_y + y_rand;
+    if scenario ==6
+        if i==100
+            new2_line_y = new2_line_y - 100
+        end    
+    end
     plot(x_car, new2_line_y, 'r.', 'LineWidth', 5)
     
     plot(pgon_car);
@@ -219,7 +226,7 @@ for i = 1:160%118
     
     %Check for Parking Spot
     distance = new2_line_y - y_car - dy_robo/2 % distance = US echoes - top edge of car
-    
+
     %distance = intp_line_y(3) - intp_line_y(2) - y_car;
     if distance<200 && detect_obj1_flag == 0 && detect_flag==0 && detect_obj2_flag==0
         start_distance_obj1 = x_car;
